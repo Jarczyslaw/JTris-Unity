@@ -7,6 +7,8 @@ public class Board : MonoBehaviour
 {
     public GameObject boardBlockPrefab;
 
+    public Game game;
+
     [NonSerialized]
     public int cols = 10;
     [NonSerialized]
@@ -27,8 +29,15 @@ public class Board : MonoBehaviour
 
         CreateBoard();
 
-        FillBoard(false);
+        Clear();
         //ChessBoard();
+    }
+
+    public void Clear()
+    {
+        if (removeCoroutine != null)
+            StopCoroutine(removeCoroutine);
+        FillBoard(false);
     }
 
     private void ForEach(Action<int,int> blockAction)
@@ -119,6 +128,7 @@ public class Board : MonoBehaviour
 
     public int TryToRemoveFullRows()
     {
+        game.blockInput = true;
         List<int> rowsToRemove = new List<int>();
         for (int i = rows - 1; i >= 0; i--)
             if (CheckFullRow(i))
@@ -131,6 +141,8 @@ public class Board : MonoBehaviour
             removeCoroutine = RemoveCoroutine(rowsToRemove);
             StartCoroutine(removeCoroutine);
         }
+        else
+            game.blockInput = false;
         return rowsToRemove.Count;
     }
 
@@ -162,6 +174,7 @@ public class Board : MonoBehaviour
                 }
             }
         }
+        game.blockInput = false;
     }
 
     private void MoveRow(int from, int to)
