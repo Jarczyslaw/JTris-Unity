@@ -36,6 +36,8 @@ public class FiguresPool : MonoBehaviour {
             ReturnToPool(nextFigure);
             nextFigure = null;
         }
+        foreach (Figure fig in figures)
+            ReturnToPool(fig);
     }
 	
     public void GetFigures()

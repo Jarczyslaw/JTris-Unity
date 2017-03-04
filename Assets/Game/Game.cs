@@ -4,24 +4,35 @@ using System;
 
 public class Game : MonoBehaviour
 {
+    public Main main;
+
     public Board board;
     public Grid grid;
     public FiguresPool figuresPool;
     [NonSerialized]
     public Figure currentFigure;
     public GameObject nextFigureSpawnPoint;
+    public GameTick gameTick;
 
     private IEnumerator dropCoroutine;
 
     [NonSerialized]
-    public bool blockInput = false;
+    public bool blockInput = true;
+
+    [NonSerialized]
+    public int points = 0;
+    private int maxPoints = 999999;
 
     void Awake()
     {
         figuresPool.Initialize();
         board.Initialize();
         grid.Initialize(board);
-        SpawnFigure();
+
+        gameTick.tickAction = () =>
+        {
+            
+        };
     }
 
     public void Clear()
@@ -31,6 +42,18 @@ public class Game : MonoBehaviour
         board.Clear();
         figuresPool.Clear();
         SpawnFigure();
+        blockInput = false;
+        points = 0;
+        gameTick.Run();
+    }
+
+    public void Pause()
+    {
+        blockInput = true;
+    }
+
+    public void Resume()
+    {
         blockInput = false;
     }
 
@@ -44,7 +67,26 @@ public class Game : MonoBehaviour
         currentFigure.transform.position = board.spawnPoint;
         currentFigure.UpdateVectors();
         if (!board.CheckBoard(currentFigure.vects))
-            Debug.Log("END");
+        {
+            main.GameEnd();
+            main.ShowDelayedGameOver();
+        }    
+    }
+
+    private void AddPoints(int linesRemoved)
+    {
+        if (linesRemoved != 0)
+        {
+            points += linesRemoved;
+            if (linesRemoved == 3)
+                points += 1;
+            else if (linesRemoved == 4)
+                points += 3;
+
+            if (points > maxPoints)
+                points = maxPoints;
+            main.UpdatePoints(points);
+        }
     }
 
     public void RotateLeft()
@@ -83,7 +125,8 @@ public class Game : MonoBehaviour
             {
                 currentFigure.MoveDown();
                 board.MoveToStack(currentFigure.vects);
-                board.TryToRemoveFullRows();
+                int removedLines = board.TryToRemoveFullRows();
+                AddPoints(removedLines);
                 figuresPool.ReturnToPool(currentFigure);
                 SpawnFigure();
                 moveToBoard = true;

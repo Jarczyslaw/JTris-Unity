@@ -28,7 +28,6 @@ public class Board : MonoBehaviour
         spawnPoint = new Vector3((float)(cols / 2), 0f, 0f);
 
         CreateBoard();
-
         Clear();
         //ChessBoard();
     }
