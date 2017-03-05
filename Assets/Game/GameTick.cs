@@ -10,7 +10,7 @@ public class GameTick : MonoBehaviour
     [NonSerialized]
     public float startTickInterval = 5f;
     [NonSerialized]
-    public float minTickInterval = 0.2f;
+    public float minTickInterval = 0.05f;
     [NonSerialized]
     public float tickMultiplier = 0.75f;
     [NonSerialized]
@@ -75,5 +75,10 @@ public class GameTick : MonoBehaviour
     public void Resume()
     {
         running = true;
+    }
+
+    public void RestoreTickTime()
+    {
+        tickTimeAccu = 0f;
     }
 }

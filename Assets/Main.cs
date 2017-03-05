@@ -13,6 +13,8 @@ public class Main : Singleton<Main>
 
     private void Start()
     {
+        Screen.sleepTimeout = SleepTimeout.NeverSleep;
+
         timer.updateEvent += UpdateTime;
         mainCamera.SetMenuView();
     }
@@ -50,6 +52,7 @@ public class Main : Singleton<Main>
         timer.Stop();
 
         GraphicalUI.I.gameOver.UpdateFinalText(game.points, timer.value);
+        GraphicalUI.I.menu.ShowLastScore(game.points);
     }
 
     public void ShowDelayedGameOver()

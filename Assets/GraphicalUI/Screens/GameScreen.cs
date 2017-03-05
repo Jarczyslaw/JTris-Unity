@@ -4,6 +4,8 @@ using UnityEngine.UI;
 
 public class GameScreen : GenericScreen
 {
+    public TouchKeypad touchKeypad;
+
     public Text pointsText;
     public Text timeText;
     public Button pauseButton;
@@ -11,6 +13,7 @@ public class GameScreen : GenericScreen
     public override void Show()
     {
         SetPauseButtonState(true);
+        touchKeypad.Init();
         base.Show();
     }
 

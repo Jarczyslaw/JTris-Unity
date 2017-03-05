@@ -21,6 +21,8 @@ public class Board : MonoBehaviour
 
     private IEnumerator removeCoroutine;
 
+    private bool paused = false;
+
     public void Initialize()
     {
         blocks = new SpriteRenderer[rows, cols];
@@ -32,11 +34,22 @@ public class Board : MonoBehaviour
         //ChessBoard();
     }
 
+    public void Pause()
+    {
+        paused = true;
+    }
+
+    public void Resume()
+    {
+        paused = false;
+    }
+
     public void Clear()
     {
         if (removeCoroutine != null)
             StopCoroutine(removeCoroutine);
         FillBoard(false);
+        paused = false;
     }
 
     private void ForEach(Action<int,int> blockAction)
@@ -127,7 +140,6 @@ public class Board : MonoBehaviour
 
     public int TryToRemoveFullRows()
     {
-        game.blockInput = true;
         List<int> rowsToRemove = new List<int>();
         for (int i = rows - 1; i >= 0; i--)
             if (CheckFullRow(i))
@@ -141,19 +153,27 @@ public class Board : MonoBehaviour
             StartCoroutine(removeCoroutine);
         }
         else
-            game.blockInput = false;
+            game.FinishMoveUp();
         return rowsToRemove.Count;
     }
 
     private IEnumerator RemoveCoroutine(List<int> rowsToRemove)
     {
         bool nextState = false;
-        for (int i = 0;i < 20;i++)
+        int counter = 20;
+        for (;;)
         {
-            for (int j = 0; j < rowsToRemove.Count;j++)
-                SetRow(rowsToRemove[j], nextState);
-            nextState = !nextState;
-            yield return new WaitForSeconds(0.025f);   
+            if (!paused)
+            {
+                for (int j = 0; j < rowsToRemove.Count; j++)
+                    SetRow(rowsToRemove[j], nextState);
+                nextState = !nextState;
+
+                counter--;
+                if (counter < 0)
+                    break;
+            }
+            yield return null;   
         }
         FinishRemove(rowsToRemove);
     }
@@ -173,7 +193,7 @@ public class Board : MonoBehaviour
                 }
             }
         }
-        game.blockInput = false;
+        game.FinishMoveUp();
     }
 
     private void MoveRow(int from, int to)

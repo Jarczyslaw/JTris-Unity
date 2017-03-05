@@ -92,10 +92,7 @@ public class GameInput : MonoBehaviour
     public void PerformMove(FigureMoves move)
     {
         if (move == FigureMoves.Up)
-        {
-            bool x = false;
-            game.MoveUp(ref x);
-        }
+            game.MoveUp();
         else if (move == FigureMoves.Drop)
             game.Drop();
         else if (move == FigureMoves.Left)

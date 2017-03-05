@@ -23,6 +23,8 @@ public class Game : MonoBehaviour
     public int points = 0;
     private int maxPoints = 999999;
 
+    private bool paused = false;
+
     void Awake()
     {
         figuresPool.Initialize();
@@ -31,7 +33,7 @@ public class Game : MonoBehaviour
 
         gameTick.tickAction = () =>
         {
-            
+            MoveUp();
         };
     }
 
@@ -43,6 +45,7 @@ public class Game : MonoBehaviour
         figuresPool.Clear();
         SpawnFigure();
         blockInput = false;
+        paused = false;
         points = 0;
         gameTick.Run();
     }
@@ -50,11 +53,17 @@ public class Game : MonoBehaviour
     public void Pause()
     {
         blockInput = true;
+        paused = true;
+        board.Pause();
+        gameTick.Stop();
     }
 
     public void Resume()
     {
         blockInput = false;
+        paused = false;
+        board.Resume();
+        gameTick.Resume();
     }
 
     private void SpawnFigure()
@@ -115,14 +124,17 @@ public class Game : MonoBehaviour
         }
     }
 
-    public void MoveUp(ref bool moveToBoard)
+    public bool MoveUp()
     {
+        bool moveToBoard = false;
         if (!blockInput)
         {
             currentFigure.MoveUp();
             if (!board.CheckTopBorder(currentFigure.vects)
                 || !board.CheckBoard(currentFigure.vects))
             {
+                gameTick.Stop();
+                blockInput = true;
                 currentFigure.MoveDown();
                 board.MoveToStack(currentFigure.vects);
                 int removedLines = board.TryToRemoveFullRows();
@@ -132,14 +144,16 @@ public class Game : MonoBehaviour
                 moveToBoard = true;
             }
             else
-                moveToBoard = false;
+                gameTick.RestoreTickTime();
         }
+        return moveToBoard;
     }
 
-    public void MoveDown()
+    public void FinishMoveUp()
     {
-        if (!blockInput)
-            currentFigure.MoveDown();
+        blockInput = false;
+        gameTick.RestoreTickTime();
+        gameTick.Resume();
     }
 
     public void MoveLeft()
@@ -168,6 +182,8 @@ public class Game : MonoBehaviour
     {
         if (!blockInput)
         {
+            gameTick.Stop();
+
             if (dropCoroutine != null)
                 StopCoroutine(dropCoroutine);
             dropCoroutine = DropCoroutine();
@@ -179,10 +195,11 @@ public class Game : MonoBehaviour
     {
         while (true)
         {
-            bool moveToBoard = false;
-            MoveUp(ref moveToBoard);
-            if (moveToBoard)
-                break;
+            if (!paused)
+            {
+                if (MoveUp())
+                    break;
+            }
             yield return null;
         }
     }

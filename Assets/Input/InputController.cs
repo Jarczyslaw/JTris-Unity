@@ -7,6 +7,8 @@ public class InputController : Singleton<InputController>
 {
     public GameInput gameInput;
 
+    public TouchKeypad touchKeypad;
+
     void Awake()
     {
         if (Application.isEditor)
@@ -30,10 +32,36 @@ public class InputController : Singleton<InputController>
                 () => Input.GetKeyDown(KeyCode.D),
                 () => Input.GetKey(KeyCode.D));
         }
+
+        gameInput.AddInputEntry(FigureMoves.Left,
+               () => touchKeypad.moveLeft.GetButtonDown(),
+               () => touchKeypad.moveLeft.GetButton());
+        gameInput.AddInputEntry(FigureMoves.Right,
+           () => touchKeypad.moveRight.GetButtonDown(),
+           () => touchKeypad.moveRight.GetButton());
+        gameInput.AddInputEntry(FigureMoves.Up,
+           () => touchKeypad.moveUp.GetButtonDown(),
+           () => touchKeypad.moveUp.GetButton());
+        gameInput.AddInputEntry(FigureMoves.RotateLeft,
+           () => touchKeypad.rotateLeft.GetButtonDown(),
+           () => touchKeypad.rotateLeft.GetButton());
+        gameInput.AddInputEntry(FigureMoves.RotateRight,
+           () => touchKeypad.rotateRight.GetButtonDown(),
+           () => touchKeypad.rotateRight.GetButton());
+        gameInput.AddInputEntry(FigureMoves.Drop,
+           () => touchKeypad.drop.GetButtonDown(),
+           () => touchKeypad.drop.GetButton());
     }
 
     private void Update()
     {
         gameInput.CheckActions();
+        ListenForBackButton();
+    }
+
+    private void ListenForBackButton()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.Backspace))
+            GraphicalUI.I.BackbuttonAction();
     }
 }
