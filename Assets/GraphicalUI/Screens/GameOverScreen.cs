@@ -6,11 +6,17 @@ using UnityEngine.UI;
 public class GameOverScreen : GenericScreen, IPointerDownHandler
 {
     public Text finalText;
+    public Text newRecordText;
 
     public void ReturnToMenu()
     {
         gui.Next(GraphicalUI.Transitions.GameOverToMenu);
         Main.I.mainCamera.SetMenuView();
+    }
+
+    public void SetNewRecordText(bool visible)
+    {
+        newRecordText.enabled = visible;
     }
 
     public void UpdateFinalText(int points, float seconds)

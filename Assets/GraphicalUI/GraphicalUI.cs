@@ -109,8 +109,19 @@ public class GraphicalUI : Singleton<GraphicalUI>
 
     public void BackbuttonAction()
     {
-        
-            
+        if (state.CurrentState == Screens.Menu)
+            menu.Exit();
+        else if (state.CurrentState == Screens.Game)
+        {
+            if (Main.I.delayedGameOverEnabled)
+                Main.I.delayedGameOverEnabled = false;
+            else
+                game.PauseButtonClick();
+        }
+        else if (state.CurrentState == Screens.Pause)
+            pause.ExitButtonClick();
+        else if (state.CurrentState == Screens.GameOver)
+            gameOver.ReturnToMenu();   
     }
 }
 

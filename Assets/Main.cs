@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class Main : Singleton<Main>
 {
@@ -8,20 +9,38 @@ public class Main : Singleton<Main>
     public MainCamera mainCamera;
     public Timer timer;
 
-    private IEnumerator gameEndCoroutine;
-    private bool gameEndDelayCancel = false;
+    public Statistics statistics;
+    public Highscores highscores;
 
-    private void Start()
+    private IEnumerator gameOverCoroutine;
+    [NonSerialized]
+    public bool delayedGameOverEnabled = false;
+
+    private void Awake()
     {
         Screen.sleepTimeout = SleepTimeout.NeverSleep;
 
+        highscores = new Highscores();
+        statistics = new Statistics();
+    }
+
+    private void Start()
+    {
         timer.updateEvent += UpdateTime;
         mainCamera.SetMenuView();
+
+        GraphicalUI.I.menu.UpdateHighscores();
+        GraphicalUI.I.menu.UpdateStatistics();
+    }
+
+    public void AppQuit()
+    {
+        Debug.Log("App quit");
+        Application.Quit();
     }
 
     public void GameStart()
     {
-        Debug.Log("START");
         game.Clear();
         UpdatePoints(game.points);
         UpdateTime(0f);
@@ -31,45 +50,50 @@ public class Main : Singleton<Main>
 
     public void Pause()
     {
-        Debug.Log("PAUSE");
         game.Pause();
         timer.Stop();
     }
 
     public void Resume()
     {
-        Debug.Log("RESUME");
         game.Resume();
         timer.Resume();
     }
 
     public void GameEnd()
     {
-        Debug.Log("END");
         GraphicalUI.I.game.SetPauseButtonState(false);
         game.blockInput = true;
         game.gameTick.Stop();
         timer.Stop();
 
+        bool newRecord = highscores.AddScore(game.points);
+        if (newRecord)
+            GraphicalUI.I.menu.UpdateHighscores();
+
+        statistics.AddGame(game.points, timer.value);
+        GraphicalUI.I.menu.UpdateStatistics();
+
         GraphicalUI.I.gameOver.UpdateFinalText(game.points, timer.value);
-        GraphicalUI.I.menu.ShowLastScore(game.points);
+        GraphicalUI.I.gameOver.SetNewRecordText(newRecord);
+        GraphicalUI.I.menu.ShowLastGame(game.points, timer.value);
     }
 
     public void ShowDelayedGameOver()
     {
-        gameEndDelayCancel = false;
-        if (gameEndCoroutine != null)
-            StopCoroutine(gameEndCoroutine);
-        gameEndCoroutine = GameEndCoroutine();
-        StartCoroutine(gameEndCoroutine);
+        delayedGameOverEnabled = true;
+        if (gameOverCoroutine != null)
+            StopCoroutine(gameOverCoroutine);
+        gameOverCoroutine = GameEndCoroutine();
+        StartCoroutine(gameOverCoroutine);
     }
 
     private IEnumerator GameEndCoroutine()
     {
-        float timeAccu = 1f;
+        float timeAccu = 2f;
         while(true)
         {
-            if (gameEndDelayCancel)
+            if (!delayedGameOverEnabled)
                 break;
             timeAccu -= Time.deltaTime;
             if (timeAccu < 0f)

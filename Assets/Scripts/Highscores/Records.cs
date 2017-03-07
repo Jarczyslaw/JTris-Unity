@@ -28,16 +28,16 @@ public class Records
 
         public override string ToString()
         {
-            return string.Format("Points: {0}, date: {1}", score, GetFormattedDate());
+            return string.Format("Points: {0}, date: {1}", score, GetDate().ToString("yyyy-MM-dd HH:mm:ss"));
         }
 
-        public string GetFormattedDate()
+        public DateTime GetDate()
         {
-            return DateTime.FromFileTimeUtc(date).ToString("yyyy-MM-dd HH:mm:ss");
+            return DateTime.FromFileTimeUtc(date);
         }
     }
 
-    private readonly int scoresCount = 5;
+    public readonly int scoresLimit = 5;
 
     public List<Score> scores = new List<Score>();
 
@@ -48,7 +48,7 @@ public class Records
             Score newScore = new Score(score, DateTime.Now);
             scores.Add(newScore);
             Sort();
-            if (scores.Count > scoresCount)
+            if (scores.Count > scoresLimit)
                 scores.RemoveAt(scores.Count - 1);
             return scores.Contains(newScore);
         }

@@ -5,6 +5,7 @@ public class MainCamera : MonoBehaviour
 {
     public Camera mainCamera;
     public Board board;
+    public GameObject menuSpawner;
 
     private Vector3 gameViewPosition;
     private float gameOrtoSize;
@@ -18,7 +19,7 @@ public class MainCamera : MonoBehaviour
         gameViewPosition = new Vector3(xPos, yPos, -10f);
         gameOrtoSize = board.rows / 2f;
 
-        menuViewPosition = new Vector3(-20f, 0f, -10f);
+        menuViewPosition = new Vector3(menuSpawner.transform.position.x, 0f, -10f);
         menuOrtoSize = 5f;
     }
 

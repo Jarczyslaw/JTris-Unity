@@ -12,7 +12,7 @@ public class Board : MonoBehaviour
     [NonSerialized]
     public int cols = 10;
     [NonSerialized]
-    public int rows = 16;
+    public int rows = 20;
 
     private SpriteRenderer[,] blocks;
 
