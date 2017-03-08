@@ -25,13 +25,13 @@ public class GameScreen : GenericScreen
 
     public void UpdateTime(float seconds)
     {
-        string time = Statics.SecondsToTime(seconds);
-        timeText.text = string.Format("Time: {0}", time);
+        timeText.text = Statics.SecondsToTime(seconds);
     }
 
     public void UpdatePoints(int points)
     {
-        pointsText.text = string.Format("Points: {0:000000}", points);
+        string p = points.ToString().PadLeft(6, '0');
+        pointsText.text = p;
     }
 
     public void SetPauseButtonState(bool enabled)

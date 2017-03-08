@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class MenuScreen : GenericScreen, IPointerDownHandler
 {
+    public GameObject lastInfo;
     public Text lastScoreText;
     public Text lastTimeText;
     public Text versionText;
@@ -19,8 +20,7 @@ public class MenuScreen : GenericScreen, IPointerDownHandler
 
     public override void Init()
     {
-        lastScoreText.enabled = false;
-        lastTimeText.enabled = false;
+        lastInfo.SetActive(false);
         highscores.Init();
         statistics.Init();
    
@@ -73,12 +73,16 @@ public class MenuScreen : GenericScreen, IPointerDownHandler
         }
     }
 
+    public void CloseButton()
+    {
+        Exit();
+    }
+
     public void ShowLastGame(int score, float time)
     {
-        lastScoreText.enabled = true;
-        lastScoreText.text = string.Format("Last score: {0}", score);
-        lastTimeText.enabled = true;
-        lastTimeText.text = string.Format("Last time: {0}", Statics.SecondsToTime(time));
+        lastInfo.SetActive(true);
+        lastScoreText.text = score.ToString();
+        lastTimeText.text = Statics.SecondsToTime(time);
     }
 
     public void UpdateHighscores()
