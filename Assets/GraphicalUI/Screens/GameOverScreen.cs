@@ -22,7 +22,7 @@ public class GameOverScreen : GenericScreen, IPointerDownHandler
     public void UpdateFinalText(int points, float seconds)
     {
         string time = Statics.SecondsToTime(seconds);
-        finalText.text = string.Format("Total points: {0:000000}\nTotal time: {1}", points, time);
+        finalText.text = string.Format("Total points:\n{0:000000}\nTotal time:\n{1}", points, time);
     }
 
     public void OnPointerDown(PointerEventData eventData)
