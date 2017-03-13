@@ -65,6 +65,9 @@ public class MenuScreen : GenericScreen, IPointerDownHandler
             Main.I.statistics.Clear();
             clearCounter = clearStartValue;
             toast.Show("Data cleared!");
+
+            UpdateHighscores();
+            UpdateStatistics();
         } 
         else
         {
@@ -81,7 +84,7 @@ public class MenuScreen : GenericScreen, IPointerDownHandler
     public void ShowLastGame(int score, float time)
     {
         lastInfo.SetActive(true);
-        lastScoreText.text = score.ToString();
+        lastScoreText.text = score.ToString().PadLeft(6, '0');
         lastTimeText.text = Statics.SecondsToTime(time);
     }
 

@@ -19,10 +19,6 @@ public class Board : MonoBehaviour
     [NonSerialized]
     public Vector3 spawnPoint;
 
-    private IEnumerator removeCoroutine;
-
-    private bool paused = false;
-
     public void Initialize()
     {
         blocks = new SpriteRenderer[rows, cols];
@@ -34,22 +30,9 @@ public class Board : MonoBehaviour
         //ChessBoard();
     }
 
-    public void Pause()
-    {
-        paused = true;
-    }
-
-    public void Resume()
-    {
-        paused = false;
-    }
-
     public void Clear()
     {
-        if (removeCoroutine != null)
-            StopCoroutine(removeCoroutine);
         FillBoard(false);
-        paused = false;
     }
 
     private void ForEach(Action<int,int> blockAction)
@@ -79,10 +62,16 @@ public class Board : MonoBehaviour
         });
     }
 
-    private void SetRow(int row, bool state)
+    public void SetRow(int row, bool state)
     {
         for (int i = 0; i < cols; i++)
             blocks[row, i].enabled = state;
+    }
+
+    public void SetRows(List<int> rows, bool state)
+    {
+        for (int i = 0; i < rows.Count; i++)
+            SetRow(rows[i], state);
     }
 
     private void ChessBoard()
@@ -138,47 +127,17 @@ public class Board : MonoBehaviour
         }
     }
 
-    public int TryToRemoveFullRows()
+    public List<int> GetFullRows()
     {
         List<int> rowsToRemove = new List<int>();
         for (int i = rows - 1; i >= 0; i--)
             if (CheckFullRow(i))
                 rowsToRemove.Add(i);
 
-        if (rowsToRemove.Count != 0)
-        {
-            if (removeCoroutine != null)
-                StopCoroutine(removeCoroutine);
-            removeCoroutine = RemoveCoroutine(rowsToRemove);
-            StartCoroutine(removeCoroutine);
-        }
-        else
-            game.FinishMoveUp();
-        return rowsToRemove.Count;
+        return rowsToRemove;
     }
 
-    private IEnumerator RemoveCoroutine(List<int> rowsToRemove)
-    {
-        bool nextState = false;
-        int counter = 20;
-        for (;;)
-        {
-            if (!paused)
-            {
-                for (int j = 0; j < rowsToRemove.Count; j++)
-                    SetRow(rowsToRemove[j], nextState);
-                nextState = !nextState;
-
-                counter--;
-                if (counter < 0)
-                    break;
-            }
-            yield return null;   
-        }
-        FinishRemove(rowsToRemove);
-    }
-
-    private void FinishRemove(List<int> rowsToRemove)
+    public void RemoveFullRows(List<int> rowsToRemove)
     {
         int offset = 0;
         for (int i = rows - 1; i >= 0; i--)
@@ -193,7 +152,6 @@ public class Board : MonoBehaviour
                 }
             }
         }
-        game.FinishMoveUp();
     }
 
     private void MoveRow(int from, int to)

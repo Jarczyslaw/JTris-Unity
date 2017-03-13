@@ -6,17 +6,18 @@ using System;
 public class GameTick : MonoBehaviour
 {
     [NonSerialized]
-    public float changeInterval = 1f * 60f;
-    [NonSerialized]
-    public float startTickInterval = 5f;
-    [NonSerialized]
-    public float minTickInterval = 0.05f;
-    [NonSerialized]
-    public float tickMultiplier = 0.75f;
-    [NonSerialized]
-    public bool running = false;
+    public int level = 1;
     [NonSerialized]
     public Action tickAction;
+    [NonSerialized]
+    public Action<int> intervalChangeAction;
+
+    private readonly float changeInterval = 60f;
+    private readonly float startTickInterval = 5f;
+    private readonly float minTickInterval = 0.05f;
+    private readonly float tickMultiplier = 0.75f;
+    
+    private bool running = false;
 
     private float currentTickInterval;
 
@@ -42,13 +43,17 @@ public class GameTick : MonoBehaviour
             {
                 if (tickAction != null)
                     tickAction();
-                tickTimeAccu -= currentTickInterval;
+                tickTimeAccu = 0f;
 
                 if (pendingChange)
                 {
                     currentTickInterval *= tickMultiplier;
                     if (currentTickInterval < minTickInterval)
                         currentTickInterval = minTickInterval;
+
+                    level++;
+                    if (intervalChangeAction != null)
+                        intervalChangeAction(level);
 
                     changeTimeAccu = 0f;
                     pendingChange = false;
@@ -59,6 +64,7 @@ public class GameTick : MonoBehaviour
 
     public void Run()
     {
+        level = 1;
         tickTimeAccu = 0f;
         changeTimeAccu = 0f;
         currentTickInterval = startTickInterval;

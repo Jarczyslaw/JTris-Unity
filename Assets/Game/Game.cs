@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 using System;
 
 public class Game : MonoBehaviour
@@ -14,7 +15,8 @@ public class Game : MonoBehaviour
     public GameObject nextFigureSpawnPoint;
     public GameTick gameTick;
 
-    private IEnumerator dropCoroutine;
+    private Routine dropRoutine;
+    private Routine removeRoutine;
 
     [NonSerialized]
     public bool blockInput = true;
@@ -22,11 +24,16 @@ public class Game : MonoBehaviour
     [NonSerialized]
     public int points = 0;
     private int maxPoints = 999999;
+    [NonSerialized]
+    public int lines = 0;
 
     private bool paused = false;
 
     void Awake()
     {
+        dropRoutine = new Routine(this);
+        removeRoutine = new Routine(this);
+
         figuresPool.Initialize();
         board.Initialize();
         grid.Initialize(board);
@@ -39,14 +46,15 @@ public class Game : MonoBehaviour
 
     public void Clear()
     {
-        if (dropCoroutine != null)
-            StopCoroutine(dropCoroutine);
+        dropRoutine.Stop();
+        removeRoutine.Stop();
         board.Clear();
         figuresPool.Clear();
         SpawnFigure();
         blockInput = false;
         paused = false;
         points = 0;
+        lines = 0;
         gameTick.Run();
     }
 
@@ -54,7 +62,6 @@ public class Game : MonoBehaviour
     {
         blockInput = true;
         paused = true;
-        board.Pause();
         gameTick.Stop();
     }
 
@@ -62,7 +69,6 @@ public class Game : MonoBehaviour
     {
         blockInput = false;
         paused = false;
-        board.Resume();
         gameTick.Resume();
     }
 
@@ -86,15 +92,18 @@ public class Game : MonoBehaviour
     {
         if (linesRemoved != 0)
         {
+            lines += linesRemoved;
             points += linesRemoved;
-            if (linesRemoved == 3)
+            if (linesRemoved == 2)
                 points += 1;
+            else if (linesRemoved == 3)
+                points += 2;
             else if (linesRemoved == 4)
-                points += 3;
+                points += 4;
 
             if (points > maxPoints)
                 points = maxPoints;
-            main.UpdatePoints(points);
+            main.UpdatePointsAndLines(points, lines);
         }
     }
 
@@ -124,36 +133,31 @@ public class Game : MonoBehaviour
         }
     }
 
-    public bool MoveUp()
+    public List<int> TryToMoveUp()
     {
-        bool moveToBoard = false;
+        currentFigure.MoveUp();
+        if (!board.CheckTopBorder(currentFigure.vects) || !board.CheckBoard(currentFigure.vects))
+        {
+            currentFigure.MoveDown();
+            board.MoveToStack(currentFigure.vects);
+            List<int> rowsToRemove = board.GetFullRows();
+            figuresPool.ReturnToPool(currentFigure);
+            SpawnFigure();
+            return rowsToRemove;
+        }
+        return null;
+    }
+
+    public void MoveUp()
+    {
         if (!blockInput)
         {
-            currentFigure.MoveUp();
-            if (!board.CheckTopBorder(currentFigure.vects)
-                || !board.CheckBoard(currentFigure.vects))
-            {
-                gameTick.Stop();
-                blockInput = true;
-                currentFigure.MoveDown();
-                board.MoveToStack(currentFigure.vects);
-                int removedLines = board.TryToRemoveFullRows();
-                AddPoints(removedLines);
-                figuresPool.ReturnToPool(currentFigure);
-                SpawnFigure();
-                moveToBoard = true;
-            }
+            List<int> rowsToRemove = TryToMoveUp();
+            if (rowsToRemove != null && rowsToRemove.Count != 0)
+                Remove(rowsToRemove);
             else
                 gameTick.RestoreTickTime();
         }
-        return moveToBoard;
-    }
-
-    public void FinishMoveUp()
-    {
-        blockInput = false;
-        gameTick.RestoreTickTime();
-        gameTick.Resume();
     }
 
     public void MoveLeft()
@@ -183,24 +187,63 @@ public class Game : MonoBehaviour
         if (!blockInput)
         {
             gameTick.Stop();
-
-            if (dropCoroutine != null)
-                StopCoroutine(dropCoroutine);
-            dropCoroutine = DropCoroutine();
-            StartCoroutine(dropCoroutine);
+            dropRoutine.Run(DropCoroutine());
         }
     }
 
     private IEnumerator DropCoroutine()
-    {
+    {  
         while (true)
         {
             if (!paused)
             {
-                if (MoveUp())
+                List<int> rowsToRemove = TryToMoveUp();
+                if (rowsToRemove != null)
+                {
+                    if (rowsToRemove.Count != 0)
+                        Remove(rowsToRemove);
+                    else
+                    {
+                        gameTick.RestoreTickTime();
+                        gameTick.Resume();
+                    }
+                    break;
+                }    
+            }
+            yield return null;
+        }
+    }
+
+    public void Remove(List<int> rowsToRemove)
+    {
+        gameTick.Stop();
+        blockInput = true;
+        AddPoints(rowsToRemove.Count);
+        removeRoutine.Run(RemoveCoroutine(rowsToRemove));
+    }
+
+    private IEnumerator RemoveCoroutine(List<int> rowsToRemove)
+    {
+        bool nextState = false;
+        int counter = 20;
+        for (;;)
+        {
+            if (!paused)
+            {
+                board.SetRows(rowsToRemove, nextState);
+                nextState = !nextState;
+
+                counter--;
+                if (counter < 0)
                     break;
             }
             yield return null;
         }
+        board.SetRows(rowsToRemove, true);
+        board.RemoveFullRows(rowsToRemove);
+
+        gameTick.RestoreTickTime();
+        gameTick.Resume();
+        blockInput = false;
     }
 }

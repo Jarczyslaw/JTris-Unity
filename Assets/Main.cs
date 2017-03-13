@@ -26,7 +26,14 @@ public class Main : Singleton<Main>
 
     private void Start()
     {
-        timer.updateEvent += UpdateTime;
+        game.gameTick.intervalChangeAction += (level) =>
+        {
+            GraphicalUI.I.game.UpdateLevelText(level);
+        };
+        timer.updateEvent = (time) =>
+        {
+            GraphicalUI.I.game.UpdateTime(time);
+        };
         mainCamera.SetMenuView();
 
         GraphicalUI.I.menu.UpdateHighscores();
@@ -42,10 +49,11 @@ public class Main : Singleton<Main>
     public void GameStart()
     {
         game.Clear();
-        UpdatePoints(game.points);
-        UpdateTime(0f);
         mainCamera.SetGameView();
         timer.Run();
+
+        GraphicalUI.I.game.UpdateTopScoreText(highscores.GetTopScore());
+        GraphicalUI.I.game.UpdateOnStart(game.points, timer.value, game.lines, game.gameTick.level);
     }
 
     public void Pause()
@@ -103,13 +111,9 @@ public class Main : Singleton<Main>
         GraphicalUI.I.Next(GraphicalUI.Transitions.GameToGameOver);
     }
 
-    public void UpdateTime(float seconds)
-    {
-        GraphicalUI.I.game.UpdateTime(seconds);
-    }
-
-    public void UpdatePoints(int points)
+    public void UpdatePointsAndLines(int points, int lines)
     {
         GraphicalUI.I.game.UpdatePoints(points);
+        GraphicalUI.I.game.UpdateLinesText(lines);
     }
 }

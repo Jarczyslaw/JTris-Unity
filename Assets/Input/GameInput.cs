@@ -15,8 +15,8 @@ public class GameInput : MonoBehaviour
 
         private IEnumerator moveCoroutine = null;
 
-        private float firstDelay = 0.5f;
-        private float repeatDelay = 0.1f;
+        private float firstDelay = 0.3f;
+        private float repeatDelay = 0.05f;
 
         public InputEntry(GameInput gameInput)
         {

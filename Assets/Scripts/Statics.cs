@@ -6,6 +6,7 @@ public static class Statics
 {
     public static string SecondsToTime(float sec)
     {
+        sec = Mathf.Round(sec);
         int hours = Mathf.FloorToInt(sec / 3600f);
         int minutes = Mathf.FloorToInt(sec / 60f);
         int seconds = Mathf.FloorToInt(sec - minutes * 60);

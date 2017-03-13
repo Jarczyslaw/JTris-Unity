@@ -20,7 +20,7 @@ public class Highscores
         records = JsonSerializer.FromFile<Records>(scoresFile);
         if (records == null)
             records = new Records();
-        Print();
+        //Print();
     }
 
     public bool AddScore(int score)
@@ -35,6 +35,14 @@ public class Highscores
     {
         records.scores.Clear();
         JsonSerializer.ToFile(records, scoresFile);
+    }
+
+    public int GetTopScore()
+    {
+        if (records.scores.Count == 0)
+            return 0;
+        else
+            return records.scores[0].score;
     }
 
     public string[,] ToArray()

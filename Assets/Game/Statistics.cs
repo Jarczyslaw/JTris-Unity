@@ -16,6 +16,8 @@ public class Statistics
     [NonSerialized]
     public float totalTime;
 
+    private int maxValue = 999999;
+
     public Statistics()
     {
         Load();
@@ -42,12 +44,17 @@ public class Statistics
         PlayerPrefs.SetInt(totalPointsKey, 0);
         PlayerPrefs.SetFloat(totalTimeKey, 0f);
         PlayerPrefs.Save();
+        Load();
     }
 
     public void AddGame(int score, float time)
     {
         totalGames++;
+        if (totalGames > maxValue)
+            totalGames = maxValue;
         totalPoints += score;
+        if (totalPoints > maxValue)
+            totalPoints = maxValue;
         totalTime += time;
         Save();
     }
@@ -56,7 +63,7 @@ public class Statistics
     {
         string result = "-";
         if (totalGames != 0)
-            result = Mathf.Round((float)totalPoints / totalGames).ToString("0.00");
+            result = ((float)totalPoints / totalGames).ToString("0.00");
         return result;
     }
 
