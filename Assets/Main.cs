@@ -12,7 +12,7 @@ public class Main : Singleton<Main>
     public Statistics statistics;
     public Highscores highscores;
 
-    private IEnumerator gameOverCoroutine;
+    private Routine gameOverRoutine;
     [NonSerialized]
     public bool delayedGameOverEnabled = false;
 
@@ -22,6 +22,7 @@ public class Main : Singleton<Main>
 
         highscores = new Highscores();
         statistics = new Statistics();
+        gameOverRoutine = new Routine(this);
     }
 
     private void Start()
@@ -90,10 +91,7 @@ public class Main : Singleton<Main>
     public void ShowDelayedGameOver()
     {
         delayedGameOverEnabled = true;
-        if (gameOverCoroutine != null)
-            StopCoroutine(gameOverCoroutine);
-        gameOverCoroutine = GameEndCoroutine();
-        StartCoroutine(gameOverCoroutine);
+        gameOverRoutine.Run(GameEndCoroutine());
     }
 
     private IEnumerator GameEndCoroutine()

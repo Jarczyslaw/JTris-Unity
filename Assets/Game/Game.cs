@@ -133,7 +133,7 @@ public class Game : MonoBehaviour
         }
     }
 
-    public List<int> TryToMoveUp()
+    private List<int> TryToMoveUp()
     {
         currentFigure.MoveUp();
         if (!board.CheckTopBorder(currentFigure.vects) || !board.CheckBoard(currentFigure.vects))
