@@ -19,22 +19,23 @@ public class TouchButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     {
         pressed = true;
         down = true;
-
-        buttonSprite.color = pressedColor;
+        if (buttonSprite != null)
+            buttonSprite.color = pressedColor;
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
         pressed = false;
-
-        buttonSprite.color = unpressedColor;
+        if (buttonSprite != null)
+            buttonSprite.color = unpressedColor;
     }
 
     public void Init()
     {
         pressed = false;
         down = false;
-        buttonSprite.color = unpressedColor;
+        if (buttonSprite != null)
+            buttonSprite.color = unpressedColor;
     }
 
     public bool GetButton()
