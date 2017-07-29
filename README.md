@@ -6,7 +6,7 @@ Classic blocks game created in Unity 3D. The blocks are stacked from above and n
 
 Game can be controlled by keys (only in Unity Editor) or by touching the screen. There are several screen parts that fire specific actions. See image below:
 
-![JTris](http://jtjt.pl/www/pages/jtris-unity/jtris2.png)
+![JTris](http://jtjt.pl/www/pages/jtris/jtris2.png)
 
 # Preview
 
